@@ -51,7 +51,7 @@ class ProdukController extends Controller
         ]);
 
         $qty = $validated['qty'] ?? 1;
-        $produk = Produk::find($validated['produk_id']);
+        $produk = Produk::findOrFail($validated['produk_id']);
 
         if (!$produk) {
             return back()->with('error', 'Produk tidak ditemukan.');
@@ -130,7 +130,7 @@ class ProdukController extends Controller
             abort(403);
         }
 
-        $keranjang->delete();
+        Keranjang::destroy($keranjang->id);
 
         return back()->with(
             'success',

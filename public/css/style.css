@@ -1,0 +1,23 @@
+ /* BACKGROUND-SIZE DIGUNAKAN UNTUK MENGATUR UKURAN BACKGROUND   */
+ /* COVER == MENUTUP SEMUA BACKGORUND DENGAN GAMBAR */
+ .banner {
+     height: 80vh;
+     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../image/foto1.avif');
+     background-size: cover;
+     background-position: center;
+
+ }
+
+ /*  justify-content=== MENENGAHKAN KONTEN SECARA HORIZONTAL */
+ /*  align-items=== MENENGAHKAN KONTEN SECARA VERTIKAL */
+ .banner-content {
+     height: 100%;
+     color: white;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+ }
+
+ .carousel-content {
+     color: white;
+ }
