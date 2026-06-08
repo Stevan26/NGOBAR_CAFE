@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Keranjang;
+use App\Models\Pemesanan;
+use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PemesananItem;
+use Illuminate\Support\Facades\DB;
 
-class ProdukControler extends Controller
+class ProdukController extends Controller
 {
     public function index()
     {
@@ -45,7 +51,7 @@ class ProdukControler extends Controller
         ]);
 
         $qty = $validated['qty'] ?? 1;
-        $produk = Produk::find($validated['produk_id']);
+        $produk = Produk::findOrFail($validated['produk_id']);
 
         if (!$produk) {
             return back()->with('error', 'Produk tidak ditemukan.');
@@ -124,7 +130,7 @@ class ProdukControler extends Controller
             abort(403);
         }
 
-        $keranjang->delete();
+        Keranjang::destroy($keranjang->id);
 
         return back()->with(
             'success',
