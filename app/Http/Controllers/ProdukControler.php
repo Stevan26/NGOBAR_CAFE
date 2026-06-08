@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Keranjang;
+use App\Models\Pemesanan;
+use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PemesananItem;
+use Illuminate\Support\Facades\DB;
 
-class ProdukControler extends Controller
+class ProdukController extends Controller
 {
     public function index()
     {
