@@ -13,32 +13,35 @@ use Illuminate\Support\Facades\Auth;
 
 
 
-// Halaman untuk customer
-
+// Halaman untuk customer (Publik)
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Customer (wajib auth + role.customer)
+Route::middleware(['auth', 'role.customer'])->group(function () {
 
-Route::get('produk', [ProdukController::class, 'produk'])
-    ->name('produk');
-Route::get('keranjang', [ProdukController::class, 'keranjang'])
-    ->name('keranjang');
-Route::get('riwayat', [ProdukController::class, 'riwayat'])
-    ->name('riwayat');
+    Route::get('produk', [ProdukController::class, 'produk'])
+        ->name('produk');
 
-Route::post('checkout', [CheckoutController::class, 'checkout'])
-    ->name('checkout');
+    // KHUSUS requirement: keranjang wajib auth
+    Route::get('keranjang', [ProdukController::class, 'keranjang'])
+        ->name('keranjang');
 
-// Form Pemesanan & Pembayaran (manual konfirmasi)
-Route::get('pembayaran/{pemesanan}', [\App\Http\Controllers\PembayaranFormController::class, 'form'])
-    ->name('pembayaran.form');
+    Route::get('riwayat', [ProdukController::class, 'riwayat'])
+        ->name('riwayat');
 
-Route::post('pembayaran/{pemesanan}/konfirmasi', [\App\Http\Controllers\PembayaranController::class, 'konfirmasiCustomer'])
-    ->name('pembayaran.konfirmasi');
+    Route::post('checkout', [CheckoutController::class, 'checkout'])
+        ->name('checkout');
 
-// Halaman tunggu customer + endpoint status (untuk polling status)
-Route::middleware(['auth','role.customer'])->group(function () {
+    // Form Pemesanan & Pembayaran (manual konfirmasi)
+    Route::get('pembayaran/{pemesanan}', [\App\Http\Controllers\PembayaranFormController::class, 'form'])
+        ->name('pembayaran.form');
+
+    Route::post('pembayaran/{pemesanan}/konfirmasi', [\App\Http\Controllers\PembayaranController::class, 'konfirmasiCustomer'])
+        ->name('pembayaran.konfirmasi');
+
+    // Halaman tunggu customer + endpoint status (untuk polling status)
     Route::get('customer/pemesanan/{pemesanan}/menunggu', function (\Illuminate\Http\Request $request, \App\Models\Pemesanan $pemesanan) {
         abort_unless($pemesanan->user_id === $request->user()->id, 403);
         return view('customer.menunggu', compact('pemesanan'));
@@ -50,20 +53,19 @@ Route::middleware(['auth','role.customer'])->group(function () {
             'status' => $pemesanan->status,
         ]);
     })->name('customer.pemesanan.status');
+
+    // Keranjang actions
+    Route::post('keranjang', [ProdukController::class, 'keranjangStore'])
+        ->name('keranjang.store');
+    Route::patch('keranjang/{keranjang}', [ProdukController::class, 'keranjangUpdate'])
+        ->name('keranjang.update');
+    Route::delete('keranjang/{keranjang}', [ProdukController::class, 'keranjangDestroy'])
+        ->name('keranjang.destroy');
 });
 
-
-// Keranjang actions
-Route::post('keranjang', [ProdukController::class, 'keranjangStore'])
-    ->name('keranjang.store');
-Route::patch('keranjang/{keranjang}', [ProdukController::class, 'keranjangUpdate'])
-    ->name('keranjang.update');
-Route::delete('keranjang/{keranjang}', [ProdukController::class, 'keranjangDestroy'])
-    ->name('keranjang.destroy');
-
-
 // Halaman untuk Admin (role-based)
-Route::middleware(['auth','role.admin'])->group(function () {
+Route::middleware(['auth', 'role.admin'])->group(function () {
+
 
 
     Route::get('admin/home', function () {
