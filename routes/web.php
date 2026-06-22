@@ -38,7 +38,7 @@ Route::post('pembayaran/{pemesanan}/konfirmasi', [\App\Http\Controllers\Pembayar
     ->name('pembayaran.konfirmasi');
 
 // Halaman tunggu customer + endpoint status (untuk polling status)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','role.customer'])->group(function () {
     Route::get('customer/pemesanan/{pemesanan}/menunggu', function (\Illuminate\Http\Request $request, \App\Models\Pemesanan $pemesanan) {
         abort_unless($pemesanan->user_id === $request->user()->id, 403);
         return view('customer.menunggu', compact('pemesanan'));
@@ -63,7 +63,8 @@ Route::delete('keranjang/{keranjang}', [ProdukController::class, 'keranjangDestr
 
 
 // Halaman untuk Admin (role-based)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','role.admin'])->group(function () {
+
 
     Route::get('admin/home', function () {
         $user = Auth::user();
@@ -127,7 +128,8 @@ Route::middleware('auth')->group(function () {
 
 
 // Halaman untuk kasir (role-based)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','role.kasir'])->group(function () {
+
 
     Route::get('kasir/home', function () {
         $user = Auth::user();
@@ -181,7 +183,8 @@ Route::post('/logout', [AuthRoleController::class, 'logout'])
     ->name('logout');
 
 // Admin: kelola user
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','role.admin'])->group(function () {
+
     Route::get('admin/users/create', function () {
         $user = Auth::user();
         abort_unless($user && $user->isAdmin(), 403);
