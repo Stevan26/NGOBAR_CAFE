@@ -20,7 +20,26 @@
             @forelse($data_produk as $produk)
                 @php
                     $gambar = $produk->gambar;
-                    $imgUrl = $gambar ? asset('storage/' . ltrim($gambar, '/')) : asset('image/placeholder.jpg');
+
+                    // Deteksi sumber gambar dari nilai kolom `gambar`.
+                    // - Jika kolom berisi path yang mengandung `storage/` => gunakan asset('storage/...')
+                    // - Jika kolom berisi hanya nama file (mis. latte.jpg) => gunakan asset('image/...') sesuai folder public/image
+                    // - Jika kosong => placeholder
+                    if (!empty($gambar)) {
+                        $gambar = trim($gambar);
+
+                        if (str_contains($gambar, 'storage/')) {
+                            $imgUrl = asset($gambar); // mis. storage/produk/xxx.jpg
+                        } elseif (str_contains($gambar, 'image/')) {
+                            // mis. image/latte.jpg
+                            $imgUrl = asset($gambar);
+                        } else {
+                            // anggap nama file relatif di folder public/image
+                            $imgUrl = asset('image/' . ltrim($gambar, '/'));
+                        }
+                    } else {
+                        $imgUrl = asset('image/placeholder.jpg');
+                    }
                 @endphp
 
                 <div class="col-12 col-sm-6 col-lg-4">
@@ -31,7 +50,7 @@
                             <img src="{{ $imgUrl }}" class="w-100 h-100"
                                 style="object-fit: cover; transform: scale(1.01);" alt="{{ $produk->nama_produk }}"
                                 loading="lazy"
-                                onerror="this.onerror=null; this.src='{{ asset('image/placeholder.jpg') }}';">
+                                onerror="this.onerror=null; this.src='{{ asset('image/placeholder.jpg') }}'; this.style.objectFit='cover';">
 
                             <div class="position-absolute top-0 start-0 p-2">
                                 <span class="badge text-bg-warning rounded-pill" style="font-size: .78rem;">
@@ -164,19 +183,21 @@
             });
         })();
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('.beli-btn');
 
             function formatRupiah(n) {
                 try {
-                    return 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(n);
+                    return 'Rp' + new Intl.NumberFormat('id-ID', {
+                        maximumFractionDigits: 0
+                    }).format(n);
                 } catch (e) {
                     return 'Rp' + n.toString();
                 }
             }
 
             buttons.forEach((btn) => {
-                btn.addEventListener('click', function () {
+                btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-produk-id');
                     const modalEl = document.getElementById('orderModal-' + id);
                     if (!modalEl) return;
@@ -198,7 +219,9 @@
                     if (qtyInput) {
                         qtyInput.max = stok > 0 ? stok : 1;
                         if (qtyInput.value < 1) qtyInput.value = 1;
-                        qtyInput.addEventListener('input', recalcTotal, { once: true });
+                        qtyInput.addEventListener('input', recalcTotal, {
+                            once: true
+                        });
                         recalcTotal();
                     }
 
