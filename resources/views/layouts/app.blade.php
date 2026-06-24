@@ -12,7 +12,17 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    @include('navbar')
+    @php
+        if (request()->routeIs('admin.*')) {
+            $navbarView = 'admin.users.navbar';
+        } elseif (request()->routeIs('kasir.*')) {
+            $navbarView = 'kasir.navbar';
+        } else {
+            $navbarView = 'customer.navbar';
+        }
+    @endphp
+
+    @include($navbarView)
 
     <main class="flex-fill">
 

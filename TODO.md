@@ -1,23 +1,12 @@
-# TODO - Refactor Multi-Role (Admin/Kasir/Customer)
+# TODO - Ngobar Cafe (Customer Flow Overhaul)
 
-- [ ] Cek/mastikan blade role yang diminta ada:
-  - [x] resources/views/admin/dashboard.blade.php (buat bila belum ada)
-  - [x] resources/views/kasir/detail-pesanan.blade.php (buat bila belum ada)
-
-- [x] Refactor `routes/web.php`:
-
-  - [ ] Public routes tetap di luar auth
-  - [ ] Customer routes dibungkus `auth` + `role.customer`
-  - [ ] KHUSUS: `keranjang` (GET + actions POST/PATCH/DELETE) wajib masuk grup customer auth
-  - [ ] Admin routes dibungkus `auth` + `role.admin`
-  - [ ] Kasir routes dibungkus `auth` + `role.kasir`
-  - [ ] Pastikan route name tidak rusak
-  - [ ] Pastikan semua view path memakai dot-notation bila ada `return view()` langsung
-- [x] Koreksi controller jika ada `return view()` yang masih mengarah ke path lama
-- [ ] Testing cepat:
-  - [x] `php artisan route:list`
-  - [x] `php artisan view:clear`
-  - [ ] Manual check akses role sesuai requirement
-
-
+## Status
+- [x] Auth customer: register sukses -> redirect ke login customer + flash message
+- [x] Auth customer: login sukses -> redirect ke `route('home')`
+- [x] ProdukController::keranjangStore: simpan item ke tabel `keranjangs` (bukan membuat Pemesanan langsung)
+- [x] ProdukController::riwayat: tampilkan semua status (menunggu, diproses, selesai, dibatalkan)
+- [x] resources/views/customer/keranjang.blade.php: dark mode Bootstrap rapi
+- [ ] (Opsional) Pastikan modal produk memiliki elemen tambah/kurang (sesuai requirement). Saat ini qty via input number + realtime total + disable saat stok tidak cukup.
+- [ ] Verifikasi bahwa route `login` dan flash message benar-benar ter-render di view login customer.
+- [ ] Smoke test flow: register -> login -> buka produk (publik) -> tambah ke keranjang -> checkout -> riwayat menampilkan semua status.
 

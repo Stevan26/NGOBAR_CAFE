@@ -50,49 +50,40 @@ class ProdukController extends Controller
             'qty'       => 'nullable|integer|min:1',
         ]);
 
-        $qty = $validated['qty'] ?? 1;
+        $qty = (int) ($validated['qty'] ?? 1);
         $produk = Produk::findOrFail($validated['produk_id']);
 
-        if (!$produk) {
-            return back()->with('error', 'Produk tidak ditemukan.');
-        }
-
-        if ((int) $produk->stok <= 0) {
+        $stokSaatIni = (int) $produk->stok;
+        if ($stokSaatIni <= 0) {
             return back()->with('error', 'Stok produk habis.');
         }
 
-        // Buat pesanan langsung (auto kirim ke tabel pemesanan_items), lalu redirect ke page kasir.
-        $total = (int) $produk->harga * $qty;
+        if ($qty > $stokSaatIni) {
+            return back()->with('error', 'Stok tidak mencukupi. Maksimum: ' . $stokSaatIni . ' pcs.');
+        }
 
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($produk, $qty, $total) {
-            if ((int) $produk->stok < $qty) {
-                throw new \Exception('Stok tidak cukup');
+        // Simpan ke tabel keranjangs (keranjang), bukan langsung membuat Pemesanan.
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($produk, $qty) {
+            $userId = Auth::id();
+
+            $keranjang = Keranjang::firstOrNew([
+                'user_id' => $userId,
+                'produk_id' => $produk->id,
+            ]);
+
+            // Jika item sudah ada, akumulasikan qty (tetap validasi stok).
+            $existingQty = (int) ($keranjang->qty ?? 0);
+            $newQty = $existingQty + $qty;
+
+            if ($newQty > (int) $produk->stok) {
+                throw new \Exception('Stok tidak mencukupi untuk penambahan qty. Maksimum: ' . (int) $produk->stok . ' pcs.');
             }
 
-            $pemesanan = Pemesanan::create([
-                'user_id' => Auth::id(),
-                'total' => (int) $total,
-                'status' => 'menunggu',
-            ]);
+            $keranjang->qty = $newQty;
+            $keranjang->save();
 
-            // Kurangi stok sekarang.
-            $produk->stok = (int) $produk->stok - (int) $qty;
-            $produk->save();
-
-            $harga = (int) $produk->harga;
-            $subtotal = $harga * $qty;
-
-            PemesananItem::create([
-                'pemesanan_id' => $pemesanan->id,
-                'produk_id' => $produk->id,
-                'qty' => (int) $qty,
-                'harga_saat_pesan' => $harga,
-                'subtotal' => (int) $subtotal,
-            ]);
-
-            // (Opsional) kalau sebelumnya item sudah masuk keranjang, tidak mengganggu.
-            return redirect()->route('kasir.home')
-                ->with('success', 'Pesanan berhasil dibuat. Silakan diproses oleh kasir.');
+            return redirect()->route('keranjang')
+                ->with('success', 'Produk berhasil ditambahkan ke keranjang.');
         });
     }
 
@@ -148,8 +139,7 @@ class ProdukController extends Controller
 
         $pemesanans = Pemesanan::with('items.produk')
             ->where('user_id', Auth::id())
-            // Muncul di riwayat setelah dikonfirmasi kasir: 'diproses' atau 'selesai'
-            ->whereIn('status', ['diproses', 'selesai'])
+            ->whereIn('status', ['menunggu', 'diproses', 'selesai', 'dibatalkan'])
             ->latest()
             ->get();
 

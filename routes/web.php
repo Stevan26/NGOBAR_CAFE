@@ -13,16 +13,39 @@ use Illuminate\Support\Facades\Auth;
 
 
 
-// Halaman untuk customer (Publik)
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+// Redirect landing khusus role
+Route::get('/admin', function () {
+    return redirect()->route('admin.home');
+});
+
+Route::get('/kasir', function () {
+    return redirect()->route('kasir.home');
+});
+
+Route::get('/customer', function () {
+    return redirect()->route('home');
+});
+
+// Halaman untuk customer (Publik) - default landing
+Route::get('/', [\App\Http\Controllers\CustomerHomeController::class, 'index'])->name('home');
+
+// Halaman autentikasi Customer (punya route /login dan /register)
+Route::get('/login', [AuthRoleController::class, 'showLoginCustomer'])->name('login');
+Route::post('/login', [AuthRoleController::class, 'loginCustomer'])->name('login.submit');
+
+Route::get('/register', [AuthRoleController::class, 'showRegisterCustomer'])->name('register');
+Route::post('/register', [AuthRoleController::class, 'registerCustomer'])->name('register.submit');
+
+
+// Route produk wajib publik
+Route::get('produk', [ProdukController::class, 'produk'])
+    ->name('produk');
 
 // Customer (wajib auth + role.customer)
 Route::middleware(['auth', 'role.customer'])->group(function () {
 
-    Route::get('produk', [ProdukController::class, 'produk'])
-        ->name('produk');
+
+
 
     // KHUSUS requirement: keranjang wajib auth
     Route::get('keranjang', [ProdukController::class, 'keranjang'])

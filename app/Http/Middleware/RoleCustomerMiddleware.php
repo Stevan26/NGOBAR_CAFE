@@ -11,11 +11,13 @@ class RoleCustomerMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!Auth::check()) {
-            // gunakan login kasir/admin tergantung role, tapi untuk customer lebih aman arahkan ke login kasir (route tersedia)
-            return redirect()->route('login.kasir');
+            // Customer belum login: requirement menyatakan customer tetap bisa akses halaman publik.
+            // Untuk endpoint customer yang memang butuh auth, middleware 'auth' akan menanganinya.
+            return $next($request);
         }
 
         $user = Auth::user();
+
 
         // Project ini tidak punya isCustomer(). Fallback ke aturan praktis:
         // Customer = bukan admin & bukan kasir.

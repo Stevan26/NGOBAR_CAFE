@@ -219,10 +219,57 @@
                     if (qtyInput) {
                         qtyInput.max = stok > 0 ? stok : 1;
                         if (qtyInput.value < 1) qtyInput.value = 1;
-                        qtyInput.addEventListener('input', recalcTotal, {
-                            once: true
-                        });
-                        recalcTotal();
+
+                        const confirmBtn = modalEl.querySelector('button[type="submit"]');
+                        let warnEl = modalEl.querySelector('[data-stock-warning-for="' + id + '"]');
+                        if (!warnEl) {
+                            warnEl = document.createElement('div');
+                            warnEl.setAttribute('data-stock-warning-for', id);
+                            warnEl.className = 'text-danger fw-semibold small mt-2';
+                            // sisipkan setelah total
+                            if (totalEl && totalEl.parentElement) {
+                                totalEl.parentElement.parentElement.appendChild(warnEl);
+                            } else {
+                                modalEl.querySelector('.modal-body').appendChild(warnEl);
+                            }
+                        }
+
+                        function recalcTotalAndValidate() {
+                            if (!qtyInput || !totalEl) return;
+                            let qty = parseInt(qtyInput.value || '1', 10);
+                            if (Number.isNaN(qty) || qty < 1) qty = 1;
+
+                            const hargaAngka = Number(harga) || 0;
+                            const stokAngka = Number(stok) || 0;
+                            const total = hargaAngka * qty;
+
+                            totalEl.textContent = formatRupiah(total);
+
+                            // Validasi stok
+                            if (qty > stokAngka) {
+                                if (confirmBtn) confirmBtn.disabled = true;
+                                if (warnEl) {
+                                    warnEl.textContent = 'Stok tidak mencukupi. Maksimum: ' + stokAngka + ' pcs.';
+                                    warnEl.style.display = '';
+                                }
+                            } else {
+                                if (confirmBtn) {
+                                    // Konfirmasi bisa enabled bila stok produk tersedia
+                                    confirmBtn.disabled = !(stokAngka > 0);
+                                }
+                                if (warnEl) {
+                                    warnEl.textContent = '';
+                                    warnEl.style.display = 'none';
+                                }
+                            }
+                        }
+
+                        // trigger ulang setiap perubahan qty
+                        qtyInput.addEventListener('input', recalcTotalAndValidate);
+                        qtyInput.addEventListener('change', recalcTotalAndValidate);
+
+                        // initial
+                        recalcTotalAndValidate();
                     }
 
                     if (window.bootstrap && window.bootstrap.Modal) {
