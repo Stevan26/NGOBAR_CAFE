@@ -1,12 +1,16 @@
-# TODO - Ngobar Cafe (Customer Flow Overhaul)
+git# TODO
 
-## Status
-- [x] Auth customer: register sukses -> redirect ke login customer + flash message
-- [x] Auth customer: login sukses -> redirect ke `route('home')`
-- [x] ProdukController::keranjangStore: simpan item ke tabel `keranjangs` (bukan membuat Pemesanan langsung)
-- [x] ProdukController::riwayat: tampilkan semua status (menunggu, diproses, selesai, dibatalkan)
-- [x] resources/views/customer/keranjang.blade.php: dark mode Bootstrap rapi
-- [ ] (Opsional) Pastikan modal produk memiliki elemen tambah/kurang (sesuai requirement). Saat ini qty via input number + realtime total + disable saat stok tidak cukup.
-- [ ] Verifikasi bahwa route `login` dan flash message benar-benar ter-render di view login customer.
-- [ ] Smoke test flow: register -> login -> buka produk (publik) -> tambah ke keranjang -> checkout -> riwayat menampilkan semua status.
+- [x] Verifikasi & sesuaikan filter “Pesanan Berjalan” di `KasirController@index` hanya status `menunggu` dan `diproses`.
+- [x] Tambah route `GET /kasir/cetak-struk/{id}` dan handler `KasirController@cetakStruk` + view `resources/views/kasir/cetak_struk.blade.php` (style thermal + auto print).
+
+- [x] Tambah route `GET /kasir/riwayat` dan handler `KasirController@riwayat` + view `resources/views/kasir/riwayat.blade.php` (tabel selesai/batal + widget total pendapatan hari ini).
+
+- [x] Update `resources/views/kasir/home.blade.php` agar tombol “Cetak Struk”:
+
+  - [ ] Menggunakan tombol per baris transaksi menuju `kasir.cetak-struk`.
+  - [ ] Tombol sidebar “Cetak Struk” diarahkan ke `kasir.riwayat`.
+- [x] Jalankan `php artisan route:clear` dan `php artisan view:clear`.
+
+- [x] Jalankan basic test: `php artisan` tidak error (minimal: composer/autoload sudah benar).
+
 

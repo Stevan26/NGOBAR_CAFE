@@ -8,7 +8,9 @@ use Illuminate\Support\Carbon;
 
 
 
+
 class KasirController extends Controller
+
 {
     public function index()
     {
@@ -36,7 +38,45 @@ class KasirController extends Controller
 
         return view('kasir.home', compact('pemesanans', 'totalHariIni', 'jumlahStatus'));
     }
+
+
+    public function cetakStruk($id)
+    {
+
+        $pemesanan = Pemesanan::query()
+            ->with(['items.produk', 'user'])
+            ->findOrFail($id);
+
+        return view('kasir.cetak_struk', compact('pemesanan'));
+    }
+
+
+    public function riwayat()
+    {
+
+        $today = Carbon::today();
+        $tomorrow = (clone $today)->addDay();
+
+        $pemesanans = Pemesanan::query()
+            ->with(['items.produk', 'user'])
+            ->whereIn('status', ['selesai', 'dibatalkan'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Total pendapatan hari ini hanya untuk status selesai.
+        $totalPendapatanHariIni = Pemesanan::query()
+            ->where('status', 'selesai')
+            ->whereBetween('created_at', [$today->startOfDay(), $tomorrow->startOfDay()])
+            ->sum('total');
+
+        return view('kasir.riwayat', compact('pemesanans', 'totalPendapatanHariIni'));
+    }
 }
+
+
+
+
+
 
 
 

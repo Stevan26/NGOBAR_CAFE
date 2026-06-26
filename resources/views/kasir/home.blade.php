@@ -86,11 +86,18 @@
                                                         'dibatalkan' => 'text-bg-danger',
                                                         default => 'text-bg-secondary',
                                                     };
+
                                                 @endphp
                                                 <div class="d-flex flex-column gap-2">
                                                     <span class="badge rounded-pill {{ $badgeClass }}">
                                                         {{ $p->status }}
                                                     </span>
+
+                                                    <a href="{{ route('kasir.cetak-struk', $p->id) }}"
+                                                        class="btn btn-sm btn-outline-warning rounded-pill fw-semibold">
+                                                        <i class="bi bi-printer me-1"></i>
+                                                        Cetak Struk
+                                                    </a>
 
                                                     @if ($p->status === 'menunggu')
                                                         <form method="POST"
@@ -180,13 +187,11 @@
                     <hr class="my-4" />
 
                     <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-outline-dark rounded-3 fw-semibold" style="pointer-events:none;"
-                            onclick="return false;">
+                        <a href="{{ route('kasir.riwayat') }}" class="btn btn-outline-dark rounded-3 fw-semibold">
                             <i class="bi bi-clock-history me-2"></i>
                             Riwayat Transaksi
                         </a>
-                        <a href="#" class="btn btn-outline-warning rounded-3 fw-semibold"
-                            style="pointer-events:none;" onclick="return false;">
+                        <a href="{{ route('kasir.riwayat') }}" class="btn btn-outline-warning rounded-3 fw-semibold">
                             <i class="bi bi-receipt-cutoff me-2"></i>
                             Cetak Struk
                         </a>

@@ -188,7 +188,12 @@ Route::middleware(['auth','role.kasir'])->group(function () {
 
         return back()->with('success', 'Status pesanan diperbarui: ' . $target);
     })->name('kasir.pemesanan.status');
+
+    Route::get('/kasir/cetak-struk/{id}', [KasirController::class, 'cetakStruk'])->name('kasir.cetak-struk');
+
+    Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
 });
+
 
 
 
