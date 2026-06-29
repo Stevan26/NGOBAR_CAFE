@@ -18,39 +18,14 @@
 
         <div class="row g-4" id="produkGrid">
             @forelse($data_produk as $produk)
-                @php
-                    $gambar = $produk->gambar;
-
-                    // Deteksi sumber gambar dari nilai kolom `gambar`.
-                    // - Jika kolom berisi path yang mengandung `storage/` => gunakan asset('storage/...')
-                    // - Jika kolom berisi hanya nama file (mis. latte.jpg) => gunakan asset('image/...') sesuai folder public/image
-                    // - Jika kosong => placeholder
-                    if (!empty($gambar)) {
-                        $gambar = trim($gambar);
-
-                        if (str_contains($gambar, 'storage/')) {
-                            $imgUrl = asset($gambar); // mis. storage/produk/xxx.jpg
-                        } elseif (str_contains($gambar, 'image/')) {
-                            // mis. image/latte.jpg
-                            $imgUrl = asset($gambar);
-                        } else {
-                            // anggap nama file relatif di folder public/image
-                            $imgUrl = asset('image/' . ltrim($gambar, '/'));
-                        }
-                    } else {
-                        $imgUrl = asset('image/placeholder.jpg');
-                    }
-                @endphp
-
                 <div class="col-12 col-sm-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm"
                         style="border-radius: 18px; overflow: hidden; background: #0b1220;">
                         <div class="position-relative"
                             style="height: 190px; background: radial-gradient(circle at top, rgba(255,193,7,.25), transparent 55%), #0b1220;">
-                            <img src="{{ $imgUrl }}" class="w-100 h-100"
-                                style="object-fit: cover; transform: scale(1.01);" alt="{{ $produk->nama_produk }}"
-                                loading="lazy"
-                                onerror="this.onerror=null; this.src='{{ asset('image/placeholder.jpg') }}'; this.style.objectFit='cover';">
+                            <img src="{{ $produk->gambar && file_exists(storage_path('app/public/' . $produk->gambar)) ? asset('storage/' . $produk->gambar) : asset('images/placeholder.jpg') }}"
+                                class="w-100 h-100" style="object-fit: cover; transform: scale(1.05);"
+                                alt="{{ $produk->nama_produk }}">
 
                             <div class="position-absolute top-0 start-0 p-2">
                                 <span class="badge text-bg-warning rounded-pill" style="font-size: .78rem;">
@@ -249,7 +224,8 @@
                             if (qty > stokAngka) {
                                 if (confirmBtn) confirmBtn.disabled = true;
                                 if (warnEl) {
-                                    warnEl.textContent = 'Stok tidak mencukupi. Maksimum: ' + stokAngka + ' pcs.';
+                                    warnEl.textContent = 'Stok tidak mencukupi. Maksimum: ' +
+                                        stokAngka + ' pcs.';
                                     warnEl.style.display = '';
                                 }
                             } else {
