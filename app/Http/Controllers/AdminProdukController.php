@@ -14,14 +14,20 @@ class AdminProdukController extends Controller
         return view('admin.produk.index', compact('produks'));
     }
 
-    public function edit(Produk $produk)
+    public function edit($produk)
     {
+        $produk = Produk::findOrFail($produk);
+
         return view('admin.produk.edit_stok_harga', compact('produk'));
     }
 
 
-    public function updateStokHarga(Request $request, Produk $produk)
+
+    public function updateStokHarga(Request $request, $produk)
     {
+        $id = $produk; // Menegaskan bahwa variabel ini berisi ID string
+        $produk = Produk::findOrFail($id);
+
         $validated = $request->validate([
             'stok' => ['required', 'integer', 'min:0'],
             'harga' => ['required', 'integer', 'min:0'],
