@@ -56,34 +56,34 @@
                                 <div class="p-3 rounded-4"
                                     style="background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);">
                                     <div class="text-white-50" style="font-size:.9rem;">Produk</div>
-                                    <div class="text-white fw-bold" style="font-size:1.6rem;">—</div>
+                                    <div class="text-white fw-bold" style="font-size:1.6rem;">{{ $totalProduk }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-3 rounded-4"
                                     style="background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);">
                                     <div class="text-white-50" style="font-size:.9rem;">Stok Habis</div>
-                                    <div class="text-white fw-bold" style="font-size:1.6rem;">—</div>
+                                    <div class="text-white fw-bold" style="font-size:1.6rem;">{{ $stokHabis }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-3 rounded-4"
                                     style="background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);">
                                     <div class="text-white-50" style="font-size:.9rem;">Pesanan</div>
-                                    <div class="text-white fw-bold" style="font-size:1.6rem;">—</div>
+                                    <div class="text-white fw-bold" style="font-size:1.6rem;">{{ $pesananHariIni }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-3 rounded-4"
                                     style="background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);">
                                     <div class="text-white-50" style="font-size:.9rem;">Revenue</div>
-                                    <div class="text-white fw-bold" style="font-size:1.6rem;">Rp —</div>
+                                    <div class="text-white fw-bold" style="font-size:1.6rem;">Rp {{ number_format($revenueHariIni, 0, ',', '.') }}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-3 text-white-50" style="font-size:.9rem;">
-                            * Angka masih placeholder. Nanti bisa dihubungkan ke database.
+                            * Angka dihitung dari data database (produk & pesanan hari ini).
                         </div>
                     </div>
                 </div>
@@ -276,3 +276,4 @@
         </div>
     </div>
 @endsection
+
