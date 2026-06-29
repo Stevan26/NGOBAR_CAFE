@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pemesanan;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 
@@ -10,8 +11,22 @@ class AdmindController extends Controller
 {
     public function index()
     {
-        return view('admin.home');
+        $totalProduk = Produk::count();
+        $stokHabis = Produk::where('stok', 0)->count();
+
+        $pesananHariIni = Pemesanan::whereDate('created_at', today())->count();
+        $revenueHariIni = Pemesanan::where('status', 'selesai')
+            ->whereDate('created_at', today())
+            ->sum('total');
+
+        return view('admin.home', compact(
+            'totalProduk',
+            'stokHabis',
+            'pesananHariIni',
+            'revenueHariIni'
+        ));
     }
+
 
     public function create()
     {
