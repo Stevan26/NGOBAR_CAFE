@@ -10,12 +10,9 @@
                     keajaiban rasa yang akan memanjakan lidah Anda. Terima kasih telah memilih NgoBar sebagai tujuan coffe anda!
                 </p>
 
-                <button type="button" class="btn btn-warning mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Reservasi
-                </button>
-                <br>
+                
 
-                <a href="{{ route('produk') }}" class="btn btn-outline-primary mt-3">Lihat Menu</a>
+                <a href="{{ route('produk') }}" class="btn btn-warning mt-3">Lihat Menu</a>
                 <br>
             </div>
         </div>
