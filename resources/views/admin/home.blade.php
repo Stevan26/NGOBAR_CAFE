@@ -77,7 +77,8 @@
                                 <div class="p-3 rounded-4"
                                     style="background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);">
                                     <div class="text-white-50" style="font-size:.9rem;">Revenue</div>
-                                    <div class="text-white fw-bold" style="font-size:1.6rem;">Rp {{ number_format($revenueHariIni, 0, ',', '.') }}</div>
+                                    <div class="text-white fw-bold" style="font-size:1.6rem;">Rp
+                                        {{ number_format($revenueHariIni, 0, ',', '.') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +210,7 @@
                 </div>
             </div>
 
-            {{-- Chart placeholder --}}
+            {{-- Performa Penjualan (Chart.js) --}}
             <div class="col-12">
                 <div class="rounded-4 bg-white border-0 shadow-sm p-3 p-md-4">
                     <div class="d-flex align-items-center justify-content-between mb-3">
@@ -226,46 +227,29 @@
 
                     <div class="rounded-4"
                         style="background: linear-gradient(180deg, rgba(255,193,7,.10), rgba(13,110,253,.06)); border:1px dashed rgba(0,0,0,.12); padding:18px;">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-6">
-                                <div class="fw-semibold">Grafik placeholder</div>
-                                <div class="text-muted" style="font-size:.95rem;">
-                                    Belum ada integrasi chart. Cocok untuk diisi library seperti Chart.js atau disiapkan
-                                    dari endpoint.
-                                </div>
-                                <div class="mt-3 d-flex gap-2 flex-wrap">
-                                    <span class="badge text-bg-warning rounded-pill">Revenue</span>
-                                    <span class="badge text-bg-primary rounded-pill">Pesanan</span>
-                                    <span class="badge text-bg-success rounded-pill">Produk Terjual</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="bg-white rounded-4 p-3 shadow-sm"
-                                    style="min-height: 140px; border:1px solid rgba(0,0,0,.06);">
-                                    <div class="d-flex justify-content-between align-items-end h-100 gap-2">
-                                        <div
-                                            style="width: 12%; height: 35%; background: rgba(255,193,7,.45); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 55%; background: rgba(13,110,253,.35); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 70%; background: rgba(25,135,84,.35); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 45%; background: rgba(255,193,7,.45); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 85%; background: rgba(13,110,253,.35); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 60%; background: rgba(25,135,84,.35); border-radius: 10px;">
-                                        </div>
-                                        <div
-                                            style="width: 12%; height: 78%; background: rgba(255,193,7,.45); border-radius: 10px;">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-12">
+                                <div class="position-relative rounded-4 bg-white p-2 shadow-sm"
+                                    style="min-height: 320px; border:1px solid rgba(0,0,0,.06);">
+
+                                    {{-- Canvas chart area --}}
+                                    <div class="position-absolute top-0 bottom-0 start-0 end-0 p-3">
+                                        <canvas id="salesPerformanceChart" style="width:100%; height:100%;"></canvas>
+                                    </div>
+
+                                    {{-- Legend / badge filter (indikator warna) --}}
+                                    <div class="position-absolute bottom-0 start-0 p-3">
+                                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                                            <span class="badge rounded-pill" id="badgeRevenue"
+                                                style="background:#FFC107; color:#1b1b1b; font-weight:600;">Revenue</span>
+                                            <span class="badge rounded-pill" id="badgePesanan"
+                                                style="background:#0D6EFD; color:#fff; font-weight:600;">Pesanan</span>
+                                            <span class="badge rounded-pill" id="badgeProdukTerjual"
+                                                style="background:#198754; color:#fff; font-weight:600;">Produk
+                                                Terjual</span>
                                         </div>
                                     </div>
-                                    <div class="text-muted mt-3" style="font-size:.9rem;">Ilustrasi</div>
+
                                 </div>
                             </div>
                         </div>
@@ -273,7 +257,160 @@
                 </div>
             </div>
 
+            {{-- Chart.js (CDN) + initialization --}}
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+            <script>
+                (function() {
+                    const ctx = document.getElementById('salesPerformanceChart');
+                    if (!ctx) return;
+
+                    const labels = @json($labels);
+                    const revenue = @json($revenueByDay);
+                    const orders = @json($ordersByDay);
+                    const productsSold = @json($productsSoldByDay);
+
+
+                    const revenueColor = '#FFC107';
+                    const ordersColor = '#0D6EFD';
+                    const productsColor = '#198754';
+
+                    // Gradient untuk line (lebih modern)
+                    const chartContainer = ctx.parentElement;
+                    let lineGradient = null;
+                    if (chartContainer && ctx) {
+                        const c2d = ctx.getContext('2d');
+                        const g = c2d.createLinearGradient(0, 0, 0, ctx.height || 300);
+                        g.addColorStop(0, 'rgba(255,193,7,0.50)');
+                        g.addColorStop(1, 'rgba(255,193,7,0.05)');
+                        lineGradient = g;
+                    }
+
+                    const chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [{
+                                    type: 'line',
+                                    label: 'Revenue',
+                                    data: revenue,
+                                    yAxisID: 'yRevenue',
+                                    borderColor: revenueColor,
+                                    backgroundColor: lineGradient || 'rgba(255,193,7,0.20)',
+                                    borderWidth: 3,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 6,
+                                    pointBackgroundColor: revenueColor,
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    tension: 0.35,
+                                    fill: true
+                                },
+                                {
+                                    type: 'bar',
+                                    label: 'Pesanan',
+                                    data: orders,
+                                    yAxisID: 'yQuantity',
+                                    backgroundColor: ordersColor,
+                                    borderColor: ordersColor,
+                                    borderWidth: 1.5,
+                                    borderRadius: 8,
+                                    barPercentage: 0.65,
+                                    categoryPercentage: 0.7
+                                },
+                                {
+                                    type: 'bar',
+                                    label: 'Produk Terjual',
+                                    data: productsSold,
+                                    yAxisID: 'yQuantity',
+                                    backgroundColor: productsColor,
+                                    borderColor: productsColor,
+                                    borderWidth: 1.5,
+                                    borderRadius: 8,
+                                    barPercentage: 0.65,
+                                    categoryPercentage: 0.7
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: 'rgba(17,24,39,.96)',
+                                    borderColor: 'rgba(255,255,255,.10)',
+                                    borderWidth: 1,
+                                    titleColor: '#e5e7eb',
+                                    bodyColor: '#f9fafb',
+                                    displayColors: true,
+                                    padding: 12,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const dsLabel = context.dataset.label;
+                                            const value = context.parsed.y;
+
+                                            if (dsLabel === 'Revenue') {
+                                                return ` ${dsLabel}: Rp${new Intl.NumberFormat('id-ID').format(value)}`;
+                                            }
+                                            // Pesanan & Produk Terjual
+                                            return ` ${dsLabel}: ${new Intl.NumberFormat('id-ID').format(value)}`;
+
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: {
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    ticks: {
+                                        color: 'rgba(17,24,39,.75)'
+                                    }
+                                },
+                                yRevenue: {
+                                    position: 'left',
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    ticks: {
+                                        color: 'rgba(17,24,39,.75)',
+                                        callback: function(val) {
+                                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(val);
+                                        }
+                                    }
+                                },
+                                yQuantity: {
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    grid: {
+                                        drawOnChartArea: false
+                                    },
+                                    ticks: {
+                                        color: 'rgba(17,24,39,.75)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Sync tinggi gradient saat resize
+                    window.addEventListener('resize', function() {
+                        // noop: Chart.js sudah responsive, gradient tidak wajib update.
+                    });
+                })();
+            </script>
+
+
         </div>
     </div>
 @endsection
-
